@@ -5,3 +5,6 @@
 
 # gitignore the built release.
 assignment3/*
+
+# gitignore the dataset
+cs231n/datasets/*

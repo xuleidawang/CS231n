@@ -48,8 +48,11 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W2' and 'b2'.                         #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        self.params['W1'] = np.reshape(hidden_dim, num_classes).random.normal(0.0, weight_scale)
+        self.params['W2'] = np.reshape(hidden_dim, num_classes).random.normal(0.0, weight_scale)
+        self.params['b1'] = 0.0
+        self.params['b2'] = 0.0
 
-        pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -83,7 +86,9 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        out1 = X.dot(self.params['W1']) + self.params['b1']
+        out1 = np.maximum(out1, 0)
+        scores = out.dot(self.params['W2']) + self.params['b2']
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -107,8 +112,20 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+       
+        shifted_logits = scores - np.max(scores, axis=1, keepdims=True)
+        Z = np.sum(np.exp(shifted_logits), axis=1, keepdims=True)
+        log_probs = shifted_logits - np.log(Z)
+        probs = np.exp(log_probs)
+        N = scores.shape[0]
+        loss = -np.sum(log_probs[np.arange(N), y]) / N
+        loss += reg*0.5*np.sum(self.params['W2'])
 
+        grads = probs.copy()
+        grads[np.arange(N), y] -= 1
+        grads /= N
+
+        grads += reg*self.params['W2']
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #

@@ -48,10 +48,10 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W2' and 'b2'.                         #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        self.params['W1'] = np.reshape(hidden_dim, num_classes).random.normal(0.0, weight_scale)
-        self.params['W2'] = np.reshape(hidden_dim, num_classes).random.normal(0.0, weight_scale)
-        self.params['b1'] = 0.0
-        self.params['b2'] = 0.0
+        self.params['W1'] = weight_scale* np.random.randn(input_dim, hidden_dim)
+        self.params['W2'] = weight_scale* np.random.randn(hidden_dim, num_classes)
+        self.params['b1'] = np.zeros(hidden_dim)
+        self.params['b2'] = np.zeros(num_classes)
 
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -85,10 +85,9 @@ class TwoLayerNet(object):
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        X2, relu_cache = affine_relu_forward(X, self.params['W1'], self.params['b1'])
+        scores, relu2_cache = affine_relu_forward(X2, self.params['W2'], self.params['b2'])
 
-        out1 = X.dot(self.params['W1']) + self.params['b1']
-        out1 = np.maximum(out1, 0)
-        scores = out.dot(self.params['W2']) + self.params['b2']
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -111,21 +110,17 @@ class TwoLayerNet(object):
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        loss, softmax_grad = softmax_loss(scores, y)
+        loss += 0.5*self.reg*(np.sum(self.params['W1']*self.params['W1']) + np.sum(self.params['W2']*self.params['W2']))
 
-       
-        shifted_logits = scores - np.max(scores, axis=1, keepdims=True)
-        Z = np.sum(np.exp(shifted_logits), axis=1, keepdims=True)
-        log_probs = shifted_logits - np.log(Z)
-        probs = np.exp(log_probs)
-        N = scores.shape[0]
-        loss = -np.sum(log_probs[np.arange(N), y]) / N
-        loss += reg*0.5*np.sum(self.params['W2'])
+        dx2, dw2, db2 = affine_relu_backward(softmax_grad, relu2_cache)
+        dx, dw, db = affine_relu_backward(dx2, relu_cache)
+        grads['W2'] = dw2 + self.reg*self.params['W2']
+        grads['b2'] = db2 
+        grads['W1'] = dw + self.reg* self.params['W1']
+        grads['b1'] = db
 
-        grads = probs.copy()
-        grads[np.arange(N), y] -= 1
-        grads /= N
 
-        grads += reg*self.params['W2']
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #

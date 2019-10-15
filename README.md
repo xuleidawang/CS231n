@@ -9,11 +9,13 @@ Once have Anaconda installed, it makes sense to create a virtual environment for
 ```conda create -n cs231n python=3.7 anaconda```  
 to create an environment called ```cs231n```.  
 To acitivate and enter the environment, run  
-``` source activate cs231n```
+``` conda activate cs231n```
 
 To exit, close the window or run  
-```source deactivate cs231n```
+```conda deactivate cs231n```
 
 
 
 Ref: [http://cs231n.github.io/setup-instructions/](http://cs231n.github.io/setup-instructions/)
+
+
